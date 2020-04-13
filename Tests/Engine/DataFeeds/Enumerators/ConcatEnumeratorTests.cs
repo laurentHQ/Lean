@@ -34,7 +34,7 @@ namespace QuantConnect.Tests.Engine.DataFeeds.Enumerators
             var enumerator1 = new List<BaseData> { new Tick(time, Symbols.SPY, 10, 10) }.GetEnumerator();
             var enumerator2 = new List<BaseData>
             {
-                new Tick(time, Symbols.SPY, 20, 20), //should be skipped because same end time as previous tick
+                new Tick(time.AddSeconds(-1), Symbols.SPY, 20, 20), //should be skipped because end time is before previous tick
                 new Tick(time.AddSeconds(1), Symbols.SPY, 30 , 30)
             }.GetEnumerator();
 
@@ -43,6 +43,42 @@ namespace QuantConnect.Tests.Engine.DataFeeds.Enumerators
             Assert.IsTrue(concat.MoveNext());
             Assert.AreEqual(10, (concat.Current as Tick).AskPrice);
             
+            if (!skipsBasedOnEndTime)
+            {
+                Assert.IsTrue(concat.MoveNext());
+                Assert.AreEqual(20, (concat.Current as Tick).AskPrice);
+            }
+
+            Assert.IsTrue(concat.MoveNext());
+            Assert.AreEqual(30, (concat.Current as Tick).AskPrice);
+
+            Assert.IsFalse(concat.MoveNext());
+            Assert.IsNull(concat.Current);
+
+            concat.Dispose();
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void EmptyEnumerators(bool skipsBasedOnEndTime)
+        {
+            var time = new DateTime(2020, 1, 1);
+            // empty enumerators
+            var enumerator1 = new List<BaseData>().GetEnumerator();
+            var enumerator2 = new List<BaseData>().GetEnumerator();
+
+            var enumerator3 = new List<BaseData>
+            {
+                new Tick(time, Symbols.SPY, 10, 10),
+                new Tick(time.AddSeconds(-1), Symbols.SPY, 20, 20), //should be skipped because end time is before previous tick
+                new Tick(time.AddSeconds(1), Symbols.SPY, 30 , 30)
+            }.GetEnumerator();
+
+            var concat = new ConcatEnumerator(skipsBasedOnEndTime, enumerator1, enumerator2, enumerator3);
+
+            Assert.IsTrue(concat.MoveNext());
+            Assert.AreEqual(10, (concat.Current as Tick).AskPrice);
+
             if (!skipsBasedOnEndTime)
             {
                 Assert.IsTrue(concat.MoveNext());

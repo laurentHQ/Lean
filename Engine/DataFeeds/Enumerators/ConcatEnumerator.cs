@@ -86,7 +86,7 @@ namespace QuantConnect.Lean.Engine.DataFeeds.Enumerators
                     if (_skipDuplicateEndTimes
                         && _lastEndTime.HasValue
                         && enumerator.Current != null
-                        && enumerator.Current.EndTime <= _lastEndTime)
+                        && enumerator.Current.EndTime < _lastEndTime)
                     {
                         continue;
                     }
