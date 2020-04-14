@@ -136,7 +136,6 @@ namespace QuantConnect.Lean.Engine.HistoricalData
                 config,
                 dataReader,
                 mapFileResolver,
-                end,
                 start,
                 request);
 
@@ -185,7 +184,6 @@ namespace QuantConnect.Lean.Engine.HistoricalData
             ITradableDatesNotifier tradableDatesNotifier,
             MapFileResolver mapFileResolver,
             DateTime start,
-            DateTime end,
             HistoryRequest request)
         {
             return CorporateEventEnumeratorFactory.CreateEnumerators(rawData, config, _factorFileProvider, tradableDatesNotifier, mapFileResolver, false, start);
